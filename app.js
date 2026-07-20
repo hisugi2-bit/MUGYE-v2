@@ -327,13 +327,13 @@ function closeSuccessModal() {
   document.getElementById('fileNamePreview').innerText = '선택된 파일: 없음';
   
   // Reset Option Card Selections to defaults
-  // Step 1 default: 암깍지
+  // Step 1 default: 숫깍지
   const typeCards = document.querySelectorAll('#step1 .option-card');
   typeCards.forEach((c, idx) => {
     if (idx === 0) c.classList.add('selected');
     else c.classList.remove('selected');
   });
-  document.getElementById('gakjiType').value = '암깍지';
+  document.getElementById('gakjiType').value = '숫깍지';
   
   // Step 2 default: 아프리카 흑단
   const materialCards = document.querySelectorAll('#step2 .option-card');
