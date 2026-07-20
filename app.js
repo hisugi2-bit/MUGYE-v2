@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initScrollAnimations();
   initWizard();
+  initBGM();
 });
 
 /* 1. Header scroll and active navigation highlighting */
@@ -349,4 +350,61 @@ function closeSuccessModal() {
   
   // Scroll to hero top
   document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* 6. Background Music (BGM) Control */
+function initBGM() {
+  const bgmAudio = document.getElementById('bgmAudio');
+  const bgmToggleBtn = document.getElementById('bgmToggleBtn');
+  const bgmLabel = document.getElementById('bgmLabel');
+  
+  if (!bgmAudio || !bgmToggleBtn) return;
+  
+  bgmAudio.volume = 0.35; // Soft ambient background music volume
+  let isPlaying = false;
+  
+  function playBGM() {
+    bgmAudio.play().then(() => {
+      isPlaying = true;
+      bgmToggleBtn.classList.remove('paused');
+      bgmToggleBtn.classList.add('playing');
+      bgmLabel.innerText = "BGM ON";
+    }).catch(err => {
+      console.log("Autoplay policy prevented audio, awaiting user interaction.");
+      pauseBGM();
+    });
+  }
+  
+  function pauseBGM() {
+    bgmAudio.pause();
+    isPlaying = false;
+    bgmToggleBtn.classList.remove('playing');
+    bgmToggleBtn.classList.add('paused');
+    bgmLabel.innerText = "BGM OFF";
+  }
+  
+  function toggleBGM() {
+    if (isPlaying) {
+      pauseBGM();
+    } else {
+      playBGM();
+    }
+  }
+  
+  bgmToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleBGM();
+  });
+
+  // Attempt user-interaction auto-start once (browser autoplay policy compliance)
+  function autoStartOnInteraction() {
+    if (!isPlaying) {
+      playBGM();
+    }
+    document.removeEventListener('click', autoStartOnInteraction);
+    document.removeEventListener('keydown', autoStartOnInteraction);
+  }
+  
+  document.addEventListener('click', autoStartOnInteraction, { once: true });
+  document.addEventListener('keydown', autoStartOnInteraction, { once: true });
 }
