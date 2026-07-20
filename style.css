@@ -512,11 +512,24 @@ header.scrolled .nav-container {
   border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
-.tabs-container {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 3.5rem;
+.subsection-title {
+  font-size: 1.6rem;
+  color: var(--primary-gold);
+  letter-spacing: 0.05em;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.subsection-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background-color: var(--primary-gold);
 }
 
 .tab-btn {
