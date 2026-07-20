@@ -396,15 +396,25 @@ function initBGM() {
     toggleBGM();
   });
 
-  // Attempt user-interaction auto-start once (browser autoplay policy compliance)
+  // Attempt user-interaction auto-start on scroll, click, or touch
   function autoStartOnInteraction() {
     if (!isPlaying) {
       playBGM();
     }
+    removeInteractionListeners();
+  }
+
+  function removeInteractionListeners() {
+    window.removeEventListener('scroll', autoStartOnInteraction);
+    window.removeEventListener('wheel', autoStartOnInteraction);
+    window.removeEventListener('touchmove', autoStartOnInteraction);
     document.removeEventListener('click', autoStartOnInteraction);
     document.removeEventListener('keydown', autoStartOnInteraction);
   }
   
+  window.addEventListener('scroll', autoStartOnInteraction, { passive: true });
+  window.addEventListener('wheel', autoStartOnInteraction, { passive: true });
+  window.addEventListener('touchmove', autoStartOnInteraction, { passive: true });
   document.addEventListener('click', autoStartOnInteraction, { once: true });
   document.addEventListener('keydown', autoStartOnInteraction, { once: true });
 }
