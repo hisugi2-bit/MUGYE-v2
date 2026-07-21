@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     thumbThickness
   } = req.body;
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || 're_YuaTNYwX_H1c5AyR8CosiiYMbFtySkjNz';
 
   if (!apiKey) {
     console.error('RESEND_API_KEY environment variable is not configured.');

@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/send-order",
+      "destination": "/api/send-order.js"
+    }
+  ]
+}
