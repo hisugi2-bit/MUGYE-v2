@@ -184,6 +184,12 @@ header.scrolled .nav-container {
   width: 100%;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
 .nav-cta {
   background-color: transparent;
   color: var(--primary-gold);
@@ -1534,37 +1540,29 @@ footer {
   }
 }
 
-/* Floating BGM Widget Styles */
-.bgm-widget {
-  position: fixed;
-  bottom: 2.5rem;
-  right: 2.5rem;
-  z-index: 999;
-}
-
+/* Header BGM Toggle Button Styles */
 .bgm-toggle-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.65rem 1.2rem;
-  background: rgba(21, 21, 23, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(197, 168, 128, 0.4);
-  border-radius: 30px;
+  gap: 0.55rem;
+  padding: 0.5rem 0.95rem;
+  background: rgba(21, 21, 23, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(197, 168, 128, 0.35);
+  border-radius: 20px;
   color: var(--primary-gold);
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .bgm-toggle-btn:hover {
   border-color: var(--primary-gold);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(197, 168, 128, 0.3);
+  background: rgba(197, 168, 128, 0.12);
+  transform: translateY(-1px);
 }
 
 .bgm-waves {
@@ -1612,12 +1610,8 @@ footer {
 }
 
 @media (max-width: 768px) {
-  .bgm-widget {
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
   .bgm-toggle-btn {
-    padding: 0.5rem 0.95rem;
-    font-size: 0.78rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.75rem;
   }
 }
