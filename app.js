@@ -290,8 +290,11 @@ function updateWizardUI() {
   }
 }
 
-// Handle final form submit
-async function handleOrderSubmit(event) {
+// Temporary storage for pending order data
+let pendingOrderData = null;
+
+// Handle final form submit (Step 1: Populate and Show Confirmation Modal)
+function handleOrderSubmit(event) {
   event.preventDefault();
   
   // Verify validation again
@@ -307,13 +310,8 @@ async function handleOrderSubmit(event) {
   const thumbWidth = document.getElementById('thumbWidth') ? document.getElementById('thumbWidth').value : '';
   const thumbThickness = document.getElementById('thumbThickness') ? document.getElementById('thumbThickness').value : '';
   
-  // Set values in summary box of the modal
-  document.getElementById('sumName').innerText = name;
-  document.getElementById('sumType').innerText = type;
-  document.getElementById('sumMaterial').innerText = material;
-  document.getElementById('sumPhone').innerText = phone;
-
-  const orderData = {
+  // Store pending order details
+  pendingOrderData = {
     customerName: name,
     customerPhone: phone,
     customerAddress: address,
@@ -325,59 +323,122 @@ async function handleOrderSubmit(event) {
     thumbThickness: thumbThickness
   };
 
-  // Send order notification email via Resend API
+  // Populate Confirmation Modal fields
+  document.getElementById('confName').innerText = name;
+  document.getElementById('confPhone').innerText = phone;
+  document.getElementById('confAddress').innerText = address;
+  document.getElementById('confType').innerText = type;
+  document.getElementById('confMaterial').innerText = material;
+  
+  // Dimensions string
+  let dimsArr = [];
+  if (circumference) dimsArr.push(`둘레: ${circumference}mm`);
+  if (thumbWidth) dimsArr.push(`너비: ${thumbWidth}mm`);
+  if (thumbThickness) dimsArr.push(`두께: ${thumbThickness}mm`);
+  document.getElementById('confDimensions').innerText = dimsArr.length > 0 ? dimsArr.join(' / ') : '미입력 (사진 대체)';
+  
+  document.getElementById('confNote').innerText = note || '요청사항 없음';
+
+  // Also set values in summary box of the final success modal
+  document.getElementById('sumName').innerText = name;
+  document.getElementById('sumType').innerText = type;
+  document.getElementById('sumMaterial').innerText = material;
+  document.getElementById('sumPhone').innerText = phone;
+
+  // Open Confirmation Modal
+  const confirmModal = document.getElementById('confirmModal');
+  confirmModal.classList.add('active');
+  document.body.style.overflow = 'hidden'; // lock scrolling
+}
+
+// Close Confirmation Modal (Return to editing)
+function closeConfirmModal() {
+  const confirmModal = document.getElementById('confirmModal');
+  if (confirmModal) confirmModal.classList.remove('active');
+  document.body.style.overflow = ''; // unlock scroll
+}
+
+// Step 2: Execute Final Email Sending after user confirms in modal
+async function executeFinalOrderSend() {
+  if (!pendingOrderData) return;
+
+  const btnFinalSend = document.getElementById('btnFinalSend');
+  if (btnFinalSend) {
+    btnFinalSend.innerText = '이메일 발송 중...';
+    btnFinalSend.disabled = true;
+  }
+
+  const { customerName, customerPhone, customerAddress, customerNote, gakjiType, gakjiMaterial, circumference, thumbWidth, thumbThickness } = pendingOrderData;
+
   const emailHtml = `
     <div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #c5a880; border-radius: 8px; padding: 25px; background-color: #121213; color: #e5e5e5;">
       <h2 style="color: #c5a880; border-bottom: 2px solid #c5a880; padding-bottom: 10px; margin-top: 0;">
         [무계 (無界)] 수제 깍지 신규 주문 접수
       </h2>
       <h3 style="color: #ffffff; margin-top: 20px;">1. 주문자 인적사항</h3>
-      <p><strong>성명:</strong> ${name}</p>
-      <p><strong>연락처:</strong> <span style="color: #c5a880; font-weight: bold;">${phone}</span></p>
-      <p><strong>배송 주소:</strong> ${address}</p>
+      <p><strong>성명:</strong> ${customerName}</p>
+      <p><strong>연락처:</strong> <span style="color: #c5a880; font-weight: bold;">${customerPhone}</span></p>
+      <p><strong>배송 주소:</strong> ${customerAddress}</p>
       <h3 style="color: #ffffff; margin-top: 20px;">2. 맞춤 제작 옵션</h3>
-      <p><strong>깍지 종류:</strong> <span style="color: #c5a880; font-weight: bold;">${type}</span></p>
-      <p><strong>제작 소재:</strong> ${material}</p>
+      <p><strong>깍지 종류:</strong> <span style="color: #c5a880; font-weight: bold;">${gakjiType}</span></p>
+      <p><strong>제작 소재:</strong> ${gakjiMaterial}</p>
       <h3 style="color: #ffffff; margin-top: 20px;">3. 측정 치수</h3>
       <p><strong>마디 둘레:</strong> ${circumference ? circumference + ' mm' : '미입력'}</p>
       <p><strong>마디 너비(좌우):</strong> ${thumbWidth ? thumbWidth + ' mm' : '미입력'}</p>
       <p><strong>마디 두께(상하):</strong> ${thumbThickness ? thumbThickness + ' mm' : '미입력'}</p>
       <h3 style="color: #ffffff; margin-top: 20px;">4. 요청사항</h3>
-      <p>${note ? note.replace(/\n/g, '<br>') : '요청사항 없음'}</p>
+      <p>${customerNote ? customerNote.replace(/\n/g, '<br>') : '요청사항 없음'}</p>
     </div>
   `;
 
-  // Read API key securely from local env.js (ignored by Git) or local server
+  // Read API key securely from local env.js (ignored by Git)
   const localKey = (typeof window !== 'undefined' && window.MUGYE_CONFIG && window.MUGYE_CONFIG.RESEND_API_KEY) ? window.MUGYE_CONFIG.RESEND_API_KEY : '';
 
+  const sendPromises = [];
+
   if (localKey) {
-    fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localKey}`
-      },
-      body: JSON.stringify({
-        from: 'MUGYE Orders <onboarding@resend.dev>',
-        to: ['retrodio1914@gmail.com'],
-        subject: `[무계 깍지 주문] ${name}님의 수제 맞춤 신청서`,
-        html: emailHtml
-      })
-    }).then(r => r.json())
-      .then(d => console.log('Resend Delivery Result:', d))
-      .catch(e => console.error('Resend Error:', e));
+    sendPromises.push(
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localKey}`
+        },
+        body: JSON.stringify({
+          from: 'MUGYE Orders <onboarding@resend.dev>',
+          to: ['retrodio1914@gmail.com'],
+          subject: `[무계 깍지 주문] ${customerName}님의 수제 맞춤 신청서`,
+          html: emailHtml
+        })
+      }).then(r => r.json()).then(d => console.log('Resend Direct Success:', d)).catch(e => console.error('Resend Direct Error:', e))
+    );
   }
 
-  // Also attempt local server endpoint if running
-  fetch('/api/send-order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(orderData)
-  }).catch(() => {});
-  
-  // Show Success Modal
+  // Also attempt local server endpoint
+  sendPromises.push(
+    fetch('/api/send-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pendingOrderData)
+    }).catch(() => {})
+  );
+
+  // Wait for sending attempt
+  await Promise.all(sendPromises);
+
+  // Reset button state
+  if (btnFinalSend) {
+    btnFinalSend.innerText = '이메일로 주문서 전송하기';
+    btnFinalSend.disabled = false;
+  }
+
+  // Close Confirmation Modal & Open Success Modal
+  closeConfirmModal();
+
   const successModal = document.getElementById('successModal');
-  successModal.classList.add('active');
+  if (successModal) successModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
   document.body.style.overflow = 'hidden'; // lock scrolling
 }
 

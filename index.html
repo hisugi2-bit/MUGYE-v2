@@ -543,6 +543,61 @@
     </div>
   </section>
 
+  <!-- Final Order Confirmation Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-content" style="max-width: 560px; text-align: left;">
+      <h3 class="modal-title serif-text text-center" style="color: var(--primary-gold); margin-bottom: 0.5rem;">무계 수제 깍지 주문서 최종 확인</h3>
+      <p class="modal-desc text-center" style="margin-bottom: 1.5rem;">
+        입력하신 맞춤 제작 정보입니다. 내역을 확인하신 후 <strong>[이메일로 주문서 전송하기]</strong> 버튼을 눌러주세요.
+      </p>
+      
+      <!-- Detailed Summary Box -->
+      <div class="order-summary-box" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(197, 168, 128, 0.3); border-radius: 6px; padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">신청자 성함</span>
+          <span style="color: #ffffff; font-weight: 600;" id="confName">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">연락처</span>
+          <span style="color: var(--primary-gold); font-weight: 600;" id="confPhone">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">배송 주소</span>
+          <span style="color: #ffffff; font-size: 0.9rem;" id="confAddress">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">깍지 형태</span>
+          <span style="color: var(--primary-gold); font-weight: 600;" id="confType">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">제작 소재</span>
+          <span style="color: #ffffff; font-weight: 600;" id="confMaterial">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: var(--text-muted-light);">측정 치수</span>
+          <span style="color: #ffffff; font-size: 0.88rem;" id="confDimensions">-</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 0.45rem 0;">
+          <span style="color: var(--text-muted-light);">요청 사항</span>
+          <span style="color: #d0d0d0; font-size: 0.88rem;" id="confNote">-</span>
+        </div>
+      </div>
+
+      <div style="background: rgba(197, 168, 128, 0.08); border-left: 3px solid var(--primary-gold); padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.85rem; color: var(--text-muted-light); margin-bottom: 1.5rem;">
+        ✉️ 수신 메일 주소: <strong style="color: var(--primary-gold);">retrodio1914@gmail.com</strong> (무계 공방 접수처)
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button type="button" class="btn-secondary" style="flex: 1; padding: 0.75rem; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #ccc; border-radius: 4px; cursor: pointer;" onclick="closeConfirmModal()">
+          수정하기
+        </button>
+        <button type="button" class="btn-primary" id="btnFinalSend" style="flex: 2; padding: 0.75rem; cursor: pointer;" onclick="executeFinalOrderSend()">
+          이메일로 주문서 전송하기
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Success Modal (Order Complete) -->
   <div class="modal-overlay" id="successModal">
     <div class="modal-content">
