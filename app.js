@@ -325,16 +325,51 @@ async function handleOrderSubmit(event) {
     thumbThickness: thumbThickness
   };
 
-  // Dispatch to Resend API serverless function
-  try {
-    fetch('/api/send-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    }).catch(err => console.log('Order notification sent:', err));
-  } catch (err) {
-    console.log('Submission:', err);
-  }
+  // Send order notification email via Resend API
+  const emailHtml = `
+    <div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #c5a880; border-radius: 8px; padding: 25px; background-color: #121213; color: #e5e5e5;">
+      <h2 style="color: #c5a880; border-bottom: 2px solid #c5a880; padding-bottom: 10px; margin-top: 0;">
+        [무계 (無界)] 수제 깍지 신규 주문 접수
+      </h2>
+      <h3 style="color: #ffffff; margin-top: 20px;">1. 주문자 인적사항</h3>
+      <p><strong>성명:</strong> ${name}</p>
+      <p><strong>연락처:</strong> <span style="color: #c5a880; font-weight: bold;">${phone}</span></p>
+      <p><strong>배송 주소:</strong> ${address}</p>
+      <h3 style="color: #ffffff; margin-top: 20px;">2. 맞춤 제작 옵션</h3>
+      <p><strong>깍지 종류:</strong> <span style="color: #c5a880; font-weight: bold;">${type}</span></p>
+      <p><strong>제작 소재:</strong> ${material}</p>
+      <h3 style="color: #ffffff; margin-top: 20px;">3. 측정 치수</h3>
+      <p><strong>마디 둘레:</strong> ${circumference ? circumference + ' mm' : '미입력'}</p>
+      <p><strong>마디 너비(좌우):</strong> ${thumbWidth ? thumbWidth + ' mm' : '미입력'}</p>
+      <p><strong>마디 두께(상하):</strong> ${thumbThickness ? thumbThickness + ' mm' : '미입력'}</p>
+      <h3 style="color: #ffffff; margin-top: 20px;">4. 요청사항</h3>
+      <p>${note ? note.replace(/\n/g, '<br>') : '요청사항 없음'}</p>
+    </div>
+  `;
+
+  // Always trigger direct Resend API call to guarantee email delivery in all environments (local, file://, server)
+  fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer re_ZtPAkWtS_5Vuqd7giuHSjJdWd5PQt8JT6'
+    },
+    body: JSON.stringify({
+      from: 'MUGYE Orders <onboarding@resend.dev>',
+      to: ['retrodio1914@gmail.com'],
+      subject: `[무계 깍지 주문] ${name}님의 수제 맞춤 신청서`,
+      html: emailHtml
+    })
+  }).then(r => r.json())
+    .then(d => console.log('Direct Resend Delivery Result:', d))
+    .catch(e => console.error('Direct Resend Error:', e));
+
+  // Also attempt local server endpoint if running
+  fetch('/api/send-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData)
+  }).catch(() => {});
   
   // Show Success Modal
   const successModal = document.getElementById('successModal');
