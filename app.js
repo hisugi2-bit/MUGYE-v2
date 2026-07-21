@@ -368,76 +368,44 @@ async function executeFinalOrderSend() {
     btnFinalSend.disabled = true;
   }
 
-  const { customerName, customerPhone, customerAddress, customerNote, gakjiType, gakjiMaterial, circumference, thumbWidth, thumbThickness } = pendingOrderData;
+  try {
+    // Determine API endpoint (use local_server endpoint on port 8080 or current origin)
+    const apiEndpoint = window.location.origin.startsWith('http') 
+      ? `${window.location.origin}/api/send-order`
+      : 'http://localhost:8080/api/send-order';
 
-  const emailHtml = `
-    <div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #c5a880; border-radius: 8px; padding: 25px; background-color: #121213; color: #e5e5e5;">
-      <h2 style="color: #c5a880; border-bottom: 2px solid #c5a880; padding-bottom: 10px; margin-top: 0;">
-        [무계 (無界)] 수제 깍지 신규 주문 접수
-      </h2>
-      <h3 style="color: #ffffff; margin-top: 20px;">1. 주문자 인적사항</h3>
-      <p><strong>성명:</strong> ${customerName}</p>
-      <p><strong>연락처:</strong> <span style="color: #c5a880; font-weight: bold;">${customerPhone}</span></p>
-      <p><strong>배송 주소:</strong> ${customerAddress}</p>
-      <h3 style="color: #ffffff; margin-top: 20px;">2. 맞춤 제작 옵션</h3>
-      <p><strong>깍지 종류:</strong> <span style="color: #c5a880; font-weight: bold;">${gakjiType}</span></p>
-      <p><strong>제작 소재:</strong> ${gakjiMaterial}</p>
-      <h3 style="color: #ffffff; margin-top: 20px;">3. 측정 치수</h3>
-      <p><strong>마디 둘레:</strong> ${circumference ? circumference + ' mm' : '미입력'}</p>
-      <p><strong>마디 너비(좌우):</strong> ${thumbWidth ? thumbWidth + ' mm' : '미입력'}</p>
-      <p><strong>마디 두께(상하):</strong> ${thumbThickness ? thumbThickness + ' mm' : '미입력'}</p>
-      <h3 style="color: #ffffff; margin-top: 20px;">4. 요청사항</h3>
-      <p>${customerNote ? customerNote.replace(/\n/g, '<br>') : '요청사항 없음'}</p>
-    </div>
-  `;
+    console.log('[무계 주문서 발송 요청]:', apiEndpoint, pendingOrderData);
 
-  // Read API key securely from local env.js (ignored by Git)
-  const localKey = (typeof window !== 'undefined' && window.MUGYE_CONFIG && window.MUGYE_CONFIG.RESEND_API_KEY) ? window.MUGYE_CONFIG.RESEND_API_KEY : '';
-
-  const sendPromises = [];
-
-  if (localKey) {
-    sendPromises.push(
-      fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localKey}`
-        },
-        body: JSON.stringify({
-          from: 'MUGYE Orders <onboarding@resend.dev>',
-          to: ['retrodio1914@gmail.com'],
-          subject: `[무계 깍지 주문] ${customerName}님의 수제 맞춤 신청서`,
-          html: emailHtml
-        })
-      }).then(r => r.json()).then(d => console.log('Resend Direct Success:', d)).catch(e => console.error('Resend Direct Error:', e))
-    );
-  }
-
-  // Also attempt local server endpoint
-  sendPromises.push(
-    fetch('/api/send-order', {
+    const res = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(pendingOrderData)
-    }).catch(() => {})
-  );
+    });
 
-  // Wait for sending attempt
-  await Promise.all(sendPromises);
+    const data = await res.json();
+    console.log('[무계 주문서 발송 결과]:', data);
 
-  // Reset button state
-  if (btnFinalSend) {
-    btnFinalSend.innerText = '이메일로 주문서 전송하기';
-    btnFinalSend.disabled = false;
+    // Reset button state
+    if (btnFinalSend) {
+      btnFinalSend.innerText = '이메일로 주문서 전송하기';
+      btnFinalSend.disabled = false;
+    }
+
+    // Close Confirmation Modal & Open Success Modal
+    closeConfirmModal();
+
+    const successModal = document.getElementById('successModal');
+    if (successModal) successModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+  } catch (err) {
+    console.error('[무계 주문서 발송 오류]:', err);
+    alert('이메일 발송 중 오류가 발생했습니다. 로컬 서버(node local_server.js)가 실행 중인지 확인해 주세요.');
+    if (btnFinalSend) {
+      btnFinalSend.innerText = '이메일로 주문서 전송하기';
+      btnFinalSend.disabled = false;
+    }
   }
-
-  // Close Confirmation Modal & Open Success Modal
-  closeConfirmModal();
-
-  const successModal = document.getElementById('successModal');
-  if (successModal) successModal.classList.add('active');
-  document.body.style.overflow = 'hidden';
 }
 
 // Reset and Close Modal
