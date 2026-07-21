@@ -347,22 +347,26 @@ async function handleOrderSubmit(event) {
     </div>
   `;
 
-  // Always trigger direct Resend API call to guarantee email delivery in all environments (local, file://, server)
-  fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer re_ZtPAkWtS_5Vuqd7giuHSjJdWd5PQt8JT6'
-    },
-    body: JSON.stringify({
-      from: 'MUGYE Orders <onboarding@resend.dev>',
-      to: ['retrodio1914@gmail.com'],
-      subject: `[무계 깍지 주문] ${name}님의 수제 맞춤 신청서`,
-      html: emailHtml
-    })
-  }).then(r => r.json())
-    .then(d => console.log('Direct Resend Delivery Result:', d))
-    .catch(e => console.error('Direct Resend Error:', e));
+  // Read API key securely from local env.js (ignored by Git) or local server
+  const localKey = (typeof window !== 'undefined' && window.MUGYE_CONFIG && window.MUGYE_CONFIG.RESEND_API_KEY) ? window.MUGYE_CONFIG.RESEND_API_KEY : '';
+
+  if (localKey) {
+    fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localKey}`
+      },
+      body: JSON.stringify({
+        from: 'MUGYE Orders <onboarding@resend.dev>',
+        to: ['retrodio1914@gmail.com'],
+        subject: `[무계 깍지 주문] ${name}님의 수제 맞춤 신청서`,
+        html: emailHtml
+      })
+    }).then(r => r.json())
+      .then(d => console.log('Resend Delivery Result:', d))
+      .catch(e => console.error('Resend Error:', e));
+  }
 
   // Also attempt local server endpoint if running
   fetch('/api/send-order', {
