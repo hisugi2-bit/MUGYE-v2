@@ -439,8 +439,6 @@ async function executeFinalOrderSend() {
   if (successModal) successModal.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
-  document.body.style.overflow = 'hidden'; // lock scrolling
-}
 
 // Reset and Close Modal
 function closeSuccessModal() {
