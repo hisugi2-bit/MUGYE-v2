@@ -291,7 +291,7 @@ function updateWizardUI() {
 }
 
 // Handle final form submit
-function handleOrderSubmit(event) {
+async function handleOrderSubmit(event) {
   event.preventDefault();
   
   // Verify validation again
@@ -301,12 +301,40 @@ function handleOrderSubmit(event) {
   const type = document.getElementById('gakjiType').value;
   const material = document.getElementById('gakjiMaterial').value;
   const phone = document.getElementById('customerPhone').value.trim();
+  const address = document.getElementById('customerAddress').value.trim();
+  const note = document.getElementById('customerNote') ? document.getElementById('customerNote').value.trim() : '';
+  const circumference = document.getElementById('circumference') ? document.getElementById('circumference').value : '';
+  const thumbWidth = document.getElementById('thumbWidth') ? document.getElementById('thumbWidth').value : '';
+  const thumbThickness = document.getElementById('thumbThickness') ? document.getElementById('thumbThickness').value : '';
   
   // Set values in summary box of the modal
   document.getElementById('sumName').innerText = name;
   document.getElementById('sumType').innerText = type;
   document.getElementById('sumMaterial').innerText = material;
   document.getElementById('sumPhone').innerText = phone;
+
+  const orderData = {
+    customerName: name,
+    customerPhone: phone,
+    customerAddress: address,
+    customerNote: note,
+    gakjiType: type,
+    gakjiMaterial: material,
+    circumference: circumference,
+    thumbWidth: thumbWidth,
+    thumbThickness: thumbThickness
+  };
+
+  // Dispatch to Resend API serverless function
+  try {
+    fetch('/api/send-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    }).catch(err => console.log('Order notification sent:', err));
+  } catch (err) {
+    console.log('Submission:', err);
+  }
   
   // Show Success Modal
   const successModal = document.getElementById('successModal');
