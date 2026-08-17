@@ -678,6 +678,96 @@
     </div>
   </div>
 
+  <!-- Reviews Section -->
+  <section class="reviews-section section-padding" id="reviews" style="border-top: 1px solid rgba(197, 168, 128, 0.1);">
+    <div class="container">
+      <div class="section-header text-center fade-in-up">
+        <span class="section-subtitle">Reviews</span>
+        <h2 class="section-title">궁사님들의 명품 피팅 생생 후기</h2>
+        <p class="section-desc">
+          무계 깍지를 착용하고 과녁을 관중시킨 궁사님들의 실제 포토 후기입니다.
+        </p>
+      </div>
+
+      <!-- Review Summary & Write Button -->
+      <div class="reviews-summary-bar fade-in-up" style="display: flex; justify-content: space-between; align-items: center; max-width: 960px; margin: 0 auto 3rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(197, 168, 128, 0.15); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span style="font-size: 2.5rem; font-weight: 700; color: var(--primary-gold);" id="averageRating">0.0</span>
+          <div>
+            <div style="color: var(--primary-gold); font-size: 1.2rem;" id="averageStars">☆☆☆☆☆</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted-light);" id="reviewCountText">전체 0개의 소중한 후기</div>
+          </div>
+        </div>
+        <button type="button" class="btn-primary" style="padding: 0.8rem 1.8rem; font-size: 0.9rem;" onclick="openReviewModal()">
+          포토 후기 작성하기
+        </button>
+      </div>
+
+      <!-- Reviews Grid -->
+      <div class="reviews-grid fade-in-up" id="reviewsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto;">
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted-light); padding: 3rem 0;">
+          후기를 불러오고 있습니다...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Write Review Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-content" style="max-width: 500px; text-align: left;">
+      <h3 class="modal-title serif-text text-center" style="color: var(--primary-gold); margin-bottom: 1.5rem;">무계 깍지 후기 작성</h3>
+      
+      <form id="reviewForm" onsubmit="handleReviewSubmit(event)">
+        <!-- Name -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="reviewName">성함</label>
+          <input type="text" id="reviewName" class="form-input" required placeholder="예: 홍길동">
+        </div>
+
+        <!-- Rating (Star Choice) -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">만족도 별점</label>
+          <div class="star-rating-select" style="display: flex; gap: 0.5rem; font-size: 1.8rem; color: #444; cursor: pointer; margin-top: 0.25rem;">
+            <span class="star-select-item" data-rating="1" onclick="setRating(1)">★</span>
+            <span class="star-select-item" data-rating="2" onclick="setRating(2)">★</span>
+            <span class="star-select-item" data-rating="3" onclick="setRating(3)">★</span>
+            <span class="star-select-item" data-rating="4" onclick="setRating(4)">★</span>
+            <span class="star-select-item" data-rating="5" onclick="setRating(5)">★</span>
+          </div>
+          <input type="hidden" id="reviewRating" value="5" required>
+        </div>
+
+        <!-- Content -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="reviewContent">상세 후기 내용</label>
+          <textarea id="reviewContent" class="form-input form-textarea" required style="height: 120px;" placeholder="착용감, 피팅감, 과녁 관중 후기 등을 솔직하게 작성해 주세요."></textarea>
+        </div>
+
+        <!-- File Upload (Photo) -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="reviewPhoto">사진 첨부 (선택)</label>
+          <input type="file" id="reviewPhoto" class="form-input" accept="image/*" style="padding: 0.5rem 0.75rem;">
+        </div>
+
+        <!-- Password (for future edit/deletion) -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="reviewPassword">비밀번호</label>
+          <input type="password" id="reviewPassword" class="form-input" required placeholder="후기 삭제 시 사용할 비밀번호 입력">
+        </div>
+
+        <!-- Buttons -->
+        <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" style="flex: 1; padding: 0.75rem 0;" onclick="closeReviewModal()">
+            취소하기
+          </button>
+          <button type="submit" class="btn-primary" id="btnSubmitReview" style="flex: 2; padding: 0.75rem 0;">
+            후기 등록하기
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer Section -->
   <footer>
     <div class="container">
@@ -716,6 +806,7 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./env.js"></script>
   <script src="./app.js"></script>
 </body>

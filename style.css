@@ -1691,3 +1691,131 @@ footer {
   }
 }
 
+/* Reviews Section Styles */
+.reviews-section {
+  background-color: var(--bg-dark);
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(197, 168, 128, 0.12);
+  border-radius: 6px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(197, 168, 128, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.review-stars {
+  color: var(--primary-gold);
+  font-size: 1rem;
+}
+
+.review-date {
+  font-size: 0.78rem;
+  color: var(--text-muted-light);
+}
+
+.review-content {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  white-space: pre-wrap;
+}
+
+.review-image-wrap {
+  width: 100%;
+  height: 160px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #000;
+  cursor: zoom-in;
+}
+
+.review-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.review-image-wrap:hover .review-image {
+  transform: scale(1.05);
+}
+
+.review-author {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-gold);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-delete-btn {
+  background: transparent;
+  border: none;
+  color: #ff4a4a;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--transition);
+}
+
+.review-delete-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Star Rating Selector Styles */
+.star-select-item {
+  transition: all 0.2s ease;
+}
+.star-select-item.selected {
+  color: var(--primary-gold) !important;
+}
+
+@media (max-width: 900px) {
+  .reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+  .reviews-summary-bar {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start !important;
+  }
+  .reviews-summary-bar button {
+    width: 100%;
+  }
+}
+
+

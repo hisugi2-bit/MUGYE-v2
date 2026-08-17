@@ -521,3 +521,234 @@ function scrollToWizard() {
   }
 }
 
+// Initialize Supabase Client
+const supabaseUrl = (typeof window !== 'undefined' && window.MUGYE_CONFIG && window.MUGYE_CONFIG.SUPABASE_URL) ? window.MUGYE_CONFIG.SUPABASE_URL : '';
+const supabaseKey = (typeof window !== 'undefined' && window.MUGYE_CONFIG && window.MUGYE_CONFIG.SUPABASE_ANON_KEY) ? window.MUGYE_CONFIG.SUPABASE_ANON_KEY : '';
+
+let supabaseClient = null;
+if (supabaseUrl && supabaseKey && typeof supabase !== 'undefined') {
+  supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+}
+
+// 1. Review Rating Selector
+let selectedRating = 5;
+function setRating(rating) {
+  selectedRating = rating;
+  document.getElementById('reviewRating').value = rating;
+  
+  const stars = document.querySelectorAll('.star-select-item');
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.add('selected');
+    } else {
+      star.classList.remove('selected');
+    }
+  });
+}
+
+// 2. Open/Close Review Modal
+function openReviewModal() {
+  const modal = document.getElementById('reviewModal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setRating(5); // Reset to 5 stars default
+  }
+}
+
+function closeReviewModal() {
+  const modal = document.getElementById('reviewModal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    document.getElementById('reviewForm').reset();
+  }
+}
+
+// 3. Fetch and Render Reviews
+async function fetchReviews() {
+  if (!supabaseClient) {
+    console.log('Supabase client not initialized. Review list skipped.');
+    const grid = document.getElementById('reviewsGrid');
+    if (grid) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted-light); padding: 3rem 0;">
+        Supabase 설정이 구성되지 않았습니다. env.js 파일 또는 Vercel 환경 변수를 확인해주세요.
+      </div>`;
+    }
+    return;
+  }
+
+  try {
+    const { data: reviews, error } = await supabaseClient
+      .from('reviews')
+      .select('*')
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const grid = document.getElementById('reviewsGrid');
+    if (!grid) return;
+
+    if (!reviews || reviews.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted-light); padding: 3rem 0;">
+        등록된 첫 포토 후기의 주인공이 되어보세요!
+      </div>`;
+      document.getElementById('averageRating').innerText = '0.0';
+      document.getElementById('averageStars').innerText = '☆☆☆☆☆';
+      document.getElementById('reviewCountText').innerText = '전체 0개의 소중한 후기';
+      return;
+    }
+
+    // Compute metrics
+    const total = reviews.length;
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    const avg = (sum / total).toFixed(1);
+
+    document.getElementById('averageRating').innerText = avg;
+    document.getElementById('averageStars').innerText = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+    document.getElementById('reviewCountText').innerText = `전체 ${total}개의 소중한 후기`;
+
+    // Render cards
+    grid.innerHTML = reviews.map(r => {
+      const dateStr = new Date(r.created_at).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      const starsStr = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+      
+      const imageHtml = r.image_url 
+        ? `<div class="review-image-wrap" onclick="window.open('${r.image_url}', '_blank')">
+             <img src="${r.image_url}" class="review-image" alt="국궁 깍지 후기 사진">
+           </div>`
+        : '';
+
+      return `
+        <div class="review-card">
+          <div>
+            <div class="review-header">
+              <span class="review-stars">${starsStr}</span>
+              <span class="review-date">${dateStr}</span>
+            </div>
+            <p class="review-content">${r.content}</p>
+          </div>
+          <div>
+            ${imageHtml}
+            <div class="review-author">
+              <span>${r.name} 궁사님</span>
+              <button type="button" class="review-delete-btn" onclick="deleteReview('${r.id}')">삭제</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+  }
+}
+
+// 4. Submit Review (Upload Photo & Insert Data)
+async function handleReviewSubmit(event) {
+  event.preventDefault();
+
+  if (!supabaseClient) {
+    alert('데이터베이스 연결이 설정되지 않았습니다.');
+    return;
+  }
+
+  const name = document.getElementById('reviewName').value.trim();
+  const rating = selectedRating;
+  const content = document.getElementById('reviewContent').value.trim();
+  const photoFile = document.getElementById('reviewPhoto').files[0];
+  const password = document.getElementById('reviewPassword').value;
+
+  const btnSubmit = document.getElementById('btnSubmitReview');
+  btnSubmit.innerText = '등록 중...';
+  btnSubmit.disabled = true;
+
+  try {
+    let imageUrl = null;
+
+    // Upload photo to Supabase Storage if attached
+    if (photoFile) {
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `reviews/${fileName}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('review-images')
+        .upload(filePath, photoFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabaseClient.storage
+        .from('review-images')
+        .getPublicUrl(filePath);
+
+      imageUrl = data.publicUrl;
+    }
+
+    // Insert into DB
+    const { error: insertError } = await supabaseClient
+      .from('reviews')
+      .insert({
+        name,
+        rating,
+        content,
+        image_url: imageUrl,
+        password,
+        is_approved: true
+      });
+
+    if (insertError) throw insertError;
+
+    alert('후기가 정상적으로 등록되었습니다!');
+    closeReviewModal();
+    fetchReviews();
+
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    alert('후기 등록 과정에서 오류가 발생했습니다: ' + err.message);
+  } finally {
+    btnSubmit.innerText = '후기 등록하기';
+    btnSubmit.disabled = false;
+  }
+}
+
+// 5. Delete Review using password
+async function deleteReview(id) {
+  if (!supabaseClient) return;
+
+  const userPassword = prompt('후기를 작성할 때 입력하신 비밀번호를 입력해주세요:');
+  if (userPassword === null) return; // user cancelled
+
+  if (!userPassword) {
+    alert('비밀번호를 입력해야 삭제가 가능합니다.');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('reviews')
+      .delete()
+      .match({ id: id, password: userPassword });
+
+    if (error) throw error;
+
+    alert('후기가 성공적으로 삭제되었습니다.');
+    fetchReviews();
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    alert('비밀번호가 일치하지 않거나 오류가 발생했습니다.');
+  }
+}
+
+// Fetch reviews on page load
+document.addEventListener('DOMContentLoaded', () => {
+  fetchReviews();
+});
+
+
