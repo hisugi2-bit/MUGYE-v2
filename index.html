@@ -345,7 +345,48 @@
         </p>
       </div>
       
-      <div class="wizard-container fade-in-up">
+      <!-- 주문 방식 선택 (전화, 문자, 온라인 양식) -->
+      <div class="order-methods-container fade-in-up">
+        
+        <!-- 전화상담 주문 -->
+        <div class="method-card">
+          <div class="method-icon">📞</div>
+          <h3 class="method-title serif-text">전화상담 주문</h3>
+          <p class="method-desc">
+            장인과 직접 전화로 통화하며 제작 옵션을 의논하고 간편하게 바로 주문합니다.
+          </p>
+          <a href="tel:010-9467-3727" class="btn-secondary method-btn" style="padding: 0.75rem 0;">
+            전화 연결하기
+          </a>
+        </div>
+
+        <!-- 간편 문자견적 -->
+        <div class="method-card">
+          <div class="method-icon">💬</div>
+          <h3 class="method-title serif-text">간편 문자견적</h3>
+          <p class="method-desc">
+            기본 제작 정보를 문자로 전송하여 빠르게 맞춤 견적 및 주문 상담을 받습니다.
+          </p>
+          <a href="sms:010-9467-3727?body=%5B%EB%AC%B4%EA%B3%84%EA%B9%8D%EC%A7%80%20%EB%AC%B8%EC%9D%98%5D%0A%EC%84%B1%ED%95%A8%3A%0A%EA%B9%8D%EC%A7%80%20%EC%A2%85%EB%A5%98(%EC%86%5B%EC%95%94)%3A%0A%EC%97%B0%EB%9D%BD%EC%B2%98%3A%0A%EC%9A%94%EC%B2%AD%EC%82%AC%ED%95%AD%3A" class="btn-secondary method-btn" style="padding: 0.75rem 0;">
+            문자 문의하기
+          </a>
+        </div>
+
+        <!-- 온라인 주문서 작성 (기존 양식 스크롤 포커스) -->
+        <div class="method-card active-method">
+          <div class="method-icon">📝</div>
+          <h3 class="method-title serif-text">온라인 주문서</h3>
+          <p class="method-desc">
+            단계별 웹 주문서를 통해 정밀 제작 치수와 요청사항을 작성하여 보냅니다.
+          </p>
+          <button type="button" class="btn-primary method-btn" style="padding: 0.75rem 0;" onclick="scrollToWizard()">
+            주문서 작성 시작
+          </button>
+        </div>
+
+      </div>
+
+      <div class="wizard-container fade-in-up" id="wizardContainer">
         <!-- Progress Steps Indicator -->
         <div class="wizard-progress">
           <div class="progress-line" id="progressLine"></div>

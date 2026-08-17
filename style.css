@@ -1615,3 +1615,79 @@ footer {
     font-size: 0.75rem;
   }
 }
+
+/* Order Method Selection styles */
+.order-methods-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+
+.method-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: 8px;
+  padding: 2.2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.method-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(197, 168, 128, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.method-card.active-method {
+  border-color: var(--primary-gold);
+  background: rgba(197, 168, 128, 0.04);
+  box-shadow: 0 4px 20px rgba(197, 168, 128, 0.12);
+}
+
+.method-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.method-title {
+  font-size: 1.25rem;
+  color: var(--primary-gold);
+  margin-bottom: 0.6rem;
+}
+
+.method-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted-light);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.method-btn {
+  width: 100%;
+  display: inline-block;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+@media (max-width: 900px) {
+  .order-methods-container {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    max-width: 500px;
+  }
+}
+

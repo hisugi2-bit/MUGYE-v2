@@ -512,3 +512,12 @@ function initBGM() {
   document.addEventListener('click', autoStartOnInteraction, { once: true });
   document.addEventListener('keydown', autoStartOnInteraction, { once: true });
 }
+
+// Scroll to wizard section smoothly
+function scrollToWizard() {
+  const wizard = document.getElementById('wizardContainer');
+  if (wizard) {
+    wizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
